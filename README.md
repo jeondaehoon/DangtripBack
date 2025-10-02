@@ -120,7 +120,7 @@
 ## 프로젝트 구조
 
 ```
-src/main/java/com/freefit/freefitapp/
+src/main/java/com/dangtrip/dangtripapp/
 ├── cafes/          # 펫프렌들리 카페 관리
 ├── cart/           # 장바구니 기능
 ├── chat/           # 실시간 채팅
@@ -204,8 +204,8 @@ src/main/java/com/freefit/freefitapp/
 
 1. **저장소 클론**
 ```bash
-git clone https://github.com/your-username/FreeFit.git
-cd FreeFit
+git clone https://github.com/your-username/dangtrip.git
+cd dangtrip
 ```
 
 2. **데이터베이스 설정**
@@ -265,8 +265,8 @@ http://localhost:8080
 이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 `LICENSE` 파일을 참조하세요.
 
 
-프로젝트 링크: [https://github.com/your-username/FreeFit](https://github.com/your-username/FreeFit)
+프로젝트 링크: [https://github.com/your-username/dangtrip](https://github.com/your-username/dangtrip)
 
 ---
 
-**FreeFit과 함께 우리 강아지의 건강한 일상을 만들어가세요! 🐾**
+**dangtrip과 함께 우리 강아지의 건강한 일상을 만들어가세요! **
