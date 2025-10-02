@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.dogdetail.dao.dogdetailDao">
+
+    <resultMap id="doginfoMap" type="com.freefit.freefitapp.vo.DogInfoVO">
+        <result column="DOG_ID" property="dogId"/>
+        <result column="USERID" property="userId"/>
+        <result column="NICKNAME" property="nickName"/>
+        <result column="DOG_NAME" property="dogName"/>
+        <result column="BREED_ID" property="breedId"/>
+        <result column="DOG_AGE" property="dogAge"/>
+        <result column="DOG_WEIGHT" property="dogWeight"/>
+        <result column="DOG_GENDER" property="dogGender"/>
+        <result column="DOG_NOTE" property="dogNote"/>
+        <result column="DOG_PERSONALITY" property="dogPersonality"/>
+        <result column="BREED_NAME" property="breedName"/>
+        <result column="HAS_DOG" property="hasDog"/>
+    </resultMap>
+    <select id="selectDogDetail" resultMap="doginfoMap" parameterType="string">
+        SELECT
+            DOG_ID,
+            USERID,
+            NICKNAME,
+            DOG_NAME,
+            BREED_ID,
+            DOG_AGE,
+            DOG_WEIGHT,
+            DOG_GENDER,
+            DOG_NOTE,
+            DOG_PERSONALITY,
+            BREED_NAME,
+            HAS_DOG
+        FROM DOGINFO
+        WHERE DOG_ID = #{dogId}
+    </select>
+
+    <update id="updateDoginfo" parameterType="com.freefit.freefitapp.vo.DogInfoVO">
+        UPDATE DOGINFO
+        SET
+            DOG_NAME = #{dogName},
+            BREED_ID = #{breedId},
+            DOG_AGE = #{dogAge},
+            DOG_WEIGHT = #{dogWeight},
+            DOG_GENDER = #{dogGender},
+            DOG_NOTE = #{dogNote},
+            DOG_PERSONALITY = #{dogPersonality},
+            HAS_DOG = #{hasDog}
+        WHERE DOG_ID = #{dogId}
+    </update>
+</mapper>

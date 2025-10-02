@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.walkstart.dao.walkstartDao">
+
+    <resultMap id="EmergencyMap" type="com.freefit.freefitapp.vo.EmergencyVO">
+        <id property="symptom_id" column="SYMPTOM_ID" />
+        <result property="name" column="NAME" />
+        <result property="severity" column="SEVERITY" />
+        <result property="action_guide" column="ACTION_GUIDE" />
+        <result property="description" column="DESCRIPTION" />
+    </resultMap>
+    
+    <resultMap id="EmergencyLogMap" type="com.freefit.freefitapp.vo.EmergencyLogVO">
+        <id property="logId" column="LOG_ID" />
+        <result property="walkId" column="WALK_ID" />
+        <result property="symptomName" column="SYMPTOM_NAME" />
+        <result property="severity" column="SEVERITY" />
+        <result property="description" column="DESCRIPTION" />
+        <result property="actionGuide" column="ACTION_GUIDE" />
+        <result property="recordedAt" column="RECORDED_AT" />
+    </resultMap>
+
+    <resultMap id="WalkLogMap" type="com.freefit.freefitapp.vo.WalkLogVO">
+        <id property="walkId" column="WALK_ID" />
+        <result property="userId" column="USERID" />
+        <result property="startTime" column="START_TIME" />
+        <result property="endTime" column="END_TIME" />
+        <result property="duration" column="DURATION" />
+        <result property="createdAt" column="CREATED_AT" />
+    </resultMap>
+
+    <select id="selectEmergencyList" resultMap="EmergencyMap">
+        SELECT
+            SYMPTOM_ID,
+            NAME,
+            SEVERITY,
+            ACTION_GUIDE,
+            DESCRIPTION
+        FROM EMERGENCY_SYMPTOM
+        ORDER BY SYMPTOM_ID ASC
+    </select>
+
+    <insert id="insertWalkLog">
+        INSERT INTO WALK_LOG (USERID, START_TIME, END_TIME, DURATION)
+        VALUES (
+                   #{userId},
+                   TO_TIMESTAMP_TZ(#{startTime}, 'YYYY-MM-DD"T"HH24:MI:SS.FF3TZH:TZM'),
+                   TO_TIMESTAMP_TZ(#{endTime},   'YYYY-MM-DD"T"HH24:MI:SS.FF3TZH:TZM'),
+                   #{duration}
+               )
+    </insert>
+
+    <select id="getLastWalkId" resultType="int">
+        SELECT MAX(WALK_ID) FROM WALK_LOG
+    </select>
+
+    <insert id="insertEmergencyLog">
+        INSERT INTO EMERGENCY_LOG (WALK_ID, SYMPTOM_NAME, SEVERITY, DESCRIPTION, ACTION_GUIDE, RECORDED_AT)
+        VALUES (
+                   #{walkId},
+                   #{symptomName},
+                   #{severity},
+                   #{description},
+                   #{actionGuide},
+                   SYSDATE
+               )
+    </insert>
+</mapper>

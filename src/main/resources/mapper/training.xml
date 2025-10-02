@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.trainings.dao.trainingDao">
+
+    <resultMap id="trainingMap" type="com.freefit.freefitapp.vo.TrainingsVO">
+        <result column="ID" property="id"/>
+        <result column="TITLE" property="title"/>
+        <result column="CATEGORY" property="category"/>
+        <result column="TRAINING_LEVEL" property="trainingLevel"/>
+        <result column="DURATION" property="duration"/>
+        <result column="DESCRIPTION" property="description"/>
+        <result column="IMAGE_URL" property="imageUrl"/>
+        <result column="VIDEO_URL" property="videoUrl"/>
+        <result column="CREATED_AT" property="createdAt"/>
+    </resultMap>
+
+    <select id="selectTrainingCategory" resultMap="trainingMap">
+        SELECT
+            ID,
+            TITLE,
+            CATEGORY,
+            TRAINING_LEVEL,
+            DURATION,
+            DESCRIPTION,
+            IMAGE_URL,
+            CREATED_AT
+            FROM TRAININGS
+        <where>
+            <if test="category != null and category != ''">
+                CATEGORY = #{category}
+            </if>
+        </where>
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <select id="selectTrainingDetail" resultMap="trainingMap">
+        SELECT
+            ID,
+            TITLE,
+            CATEGORY,
+            TRAINING_LEVEL,
+            DURATION,
+            DESCRIPTION,
+            IMAGE_URL,
+            VIDEO_URL,
+            CREATED_AT
+        FROM TRAININGS
+        WHERE ID = #{id}
+    </select>
+</mapper>

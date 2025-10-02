@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.cart.dao.cartDao">
+
+    <resultMap id="cartMap" type="com.freefit.freefitapp.vo.CartVO">
+        <result column="CART_ID" property="cartId" />
+        <result column="USERID" property="userId" />
+        <result column="PRODUCT_ID" property="productId" />
+        <result column="QUANTITY" property="quantity" />
+        <result column="CREATED_AT" property="createdAt" />
+        <result column="UPDATE_AT" property="updateAt" />
+        <result column="CATEGORY_ID" property="categoryId" />
+        <result column="CATEGORY_NAME" property="categoryName" />
+        <result column="ICON_URL" property="iconUrl" />
+        <result column="NAME" property="name" />
+        <result column="DESCRIPTION" property="description" />
+        <result column="PRICE" property="price" />
+        <result column="IMAGE_URL" property="imageUrl" />
+        <result column="RATING" property="rating" />
+        <result column="REVIEWS_COUNT" property="reviewsCount" />
+        <result column="SALES_COUNT" property="salesCount" />
+    </resultMap>
+
+    <select id="selectCart" resultMap="cartMap">
+        SELECT
+            A.CART_ID,
+            A.USERID,
+            A.PRODUCT_ID,
+            A.QUANTITY,
+            A.CREATED_AT,
+            A.UPDATED_AT,
+            B.NAME,
+            B.DESCRIPTION,
+            B.PRICE,
+            B.IMAGE_URL,
+            B.RATING,
+            B.REVIEWS_COUNT
+        FROM CART A
+                 JOIN SHOPPINGPRODUCT B ON A.PRODUCT_ID = B.PRODUCT_ID
+        WHERE A.USERID = #{userId}
+        ORDER BY A.CREATED_AT DESC
+    </select>
+
+    <update id="updateCart">
+        UPDATE CART
+        SET QUANTITY = #{quantity},
+            UPDATED_AT = SYSDATE
+        WHERE CART_ID = #{cartId}
+    </update>
+
+    <delete id="deleteCart">
+        DELETE FROM CART
+        WHERE CART_ID = #{cartId}
+    </delete>
+</mapper>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.explore.dao.exploreDao">
+
+    <resultMap id="placeResultMap" type="com.freefit.freefitapp.vo.PlaceVO">
+        <id property="id" column="ID"/>
+        <result property="title" column="TITLE"/>
+        <result property="tag" column="TAG"/>
+        <result property="rating" column="RATING"/>
+        <result property="type" column="TYPE"/>
+        <result property="lat" column="LAT"/>
+        <result property="lon" column="LON"/>
+        <result property="address" column="ADDRESS"/>
+        <result property="imageUrl" column="IMAGE_URL"/>
+    </resultMap>
+
+    <select id="selectAllPlaces" resultMap="placeResultMap">
+        SELECT ID,
+               TITLE AS TITLE,
+               TAG,
+               RATING,
+               LAT,
+               LON,
+               NULL AS ADDRESS,
+               'WALK' AS TYPE,
+               IMAGE_URL
+        FROM WALKS
+        UNION ALL
+        SELECT ID,
+               TITLE AS TITLE,
+               TAG,
+               RATING,
+               LAT,
+               LON,
+               ADDRESS,
+               'CAFE' AS TYPE,
+               IMAGE_URL
+        FROM CAFES
+        UNION ALL
+        SELECT ID,
+               NAME AS TITLE,
+               TAG,
+               RATING,
+               LAT,
+               LON,
+               ADDRESS,
+               'HOSPITAL' AS TYPE,
+               IMAGE_URL
+        FROM HOSPITAL
+        ORDER BY TYPE, ID
+    </select>
+
+    <select id="selectPlacesByType" resultMap="placeResultMap">
+        SELECT ID,
+               TITLE AS TITLE,
+               TAG,
+               RATING,
+               LAT,
+               LON,
+               NULL AS ADDRESS,
+               'WALK' AS TYPE,
+               IMAGE_URL
+        FROM WALKS
+        WHERE #{type} = 'WALK'
+        UNION ALL
+        SELECT ID,
+               TITLE AS TITLE,
+               TAG,
+               RATING,
+               LAT,
+               LON,
+               ADDRESS,
+               'CAFE' AS TYPE,
+               IMAGE_URL
+        FROM CAFES
+        WHERE #{type} = 'CAFE'
+        UNION ALL
+        SELECT ID,
+               NAME AS TITLE,
+               TAG,
+               RATING,
+               LAT,
+               LON,
+               ADDRESS,
+               'HOSPITAL' AS TYPE,
+               IMAGE_URL
+        FROM HOSPITAL
+        WHERE #{type} = 'HOSPITAL'
+        ORDER BY TYPE, ID
+    </select>
+
+</mapper>

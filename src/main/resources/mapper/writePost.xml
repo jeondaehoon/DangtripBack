@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.writePost.dao.writePostDao">
+
+    <!-- 게시글 매핑 -->
+    <resultMap id="postMap" type="com.freefit.freefitapp.vo.PostVO">
+        <id property="postId" column="POST_ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="category" column="CATEGORY"/>
+        <result property="title" column="TITLE"/>
+        <result property="content" column="CONTENT"/>
+        <result property="isPrivate" column="IS_PRIVATE"/>
+        <result property="postPassword" column="POST_PASSWORD"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+        <result property="nickname" column="NICKNAME"/>
+        <result property="likeCount" column="LIKE_COUNT"/>
+        <result property="commentCount" column="COMMENT_COUNT"/>
+        <result property="role" column="ROLE"/>
+    </resultMap>
+
+    <!-- 산책모임 매핑 -->
+    <resultMap id="walkGroupMap" type="com.freefit.freefitapp.vo.WalkGroupVO">
+        <id property="groupId" column="GROUP_ID"/>
+        <result property="title" column="TITLE"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="location" column="LOCATION"/>
+        <result property="detailAddress" column="DETAIL_ADDRESS"/>
+        <result property="imageUrl" column="IMAGE_URL"/>
+        <result property="creatorId" column="CREATOR_ID"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="meetingDays" column="MEETING_DAYS"/>
+        <result property="meetingTime" column="MEETING_TIME"/>
+        <result property="memberCount" column="MEMBER_COUNT"/>
+        <result property="nickname" column="NICKNAME"/>
+    </resultMap>
+
+    <resultMap id="walkGroupDetailMap" type="com.freefit.freefitapp.vo.WalkGroupVO">
+        <id property="groupId" column="GROUP_ID"/>
+        <result property="title" column="TITLE"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="location" column="LOCATION"/>
+        <result property="detailAddress" column="DETAIL_ADDRESS"/>
+        <result property="imageUrl" column="IMAGE_URL"/>
+        <result property="creatorId" column="CREATOR_ID"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="meetingDays" column="MEETING_DAYS"/>
+        <result property="meetingTime" column="MEETING_TIME"/>
+        <result property="memberCount" column="MEMBER_COUNT"/>
+        <result property="nickname" column="NICKNAME"/>
+
+        <!-- 공지사항 -->
+        <result property="notice" column="NOTICE_CONTENT"/>
+
+        <!-- 태그 -->
+        <collection property="tags" ofType="com.freefit.freefitapp.vo.WalkGroupTagVO">
+            <id property="tagId" column="TAG_ID"/>
+            <result property="tagName" column="TAG_NAME"/>
+            <result property="iconName" column="ICON_NAME"/>
+        </collection>
+
+        <!-- 이미지 -->
+        <collection property="images" ofType="com.freefit.freefitapp.vo.WalkGroupImageVO">
+            <id property="imageId" column="IMAGE_ID"/>
+            <result property="imageUrl" column="IMAGE_URL_SUB"/>
+            <result property="uploadedAt" column="UPLOADED_AT"/>
+        </collection>
+
+        <!-- 겔러리 -->
+        <collection property="gallery" ofType="com.freefit.freefitapp.vo.WalkGroupGalleryVO">
+            <id property="galleryId" column="GALLERY_ID"/>
+            <result property="imageUrl" column="GALLERY_IMAGE_URL"/>
+            <result property="uploadedAt" column="GALLERY_UPLOADED_AT"/>
+            <result property="uploadedBy" column="GALLERY_UPLOADED_BY"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="commentMap" type="com.freefit.freefitapp.vo.CommentVO">
+        <result property="commentId" column="COMMENT_ID" />
+        <result property="postId" column="POST_ID" />
+        <result property="userId" column="USER_ID" />
+        <result property="content" column="CONTENT" />
+        <result property="createdAt" column="CREATED_AT" />
+        <result property="nickname" column="NICKNAME"/>
+        <result property="parentId" column="PARENT_ID" />
+    </resultMap>
+
+    <resultMap id="likeMap" type="com.freefit.freefitapp.vo.LikeVO">
+        <id property="likeId" column="LIKE_ID"/>
+        <result property="postId" column="POST_ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="createdAt" column="CREATED_AT"/>
+    </resultMap>
+
+
+    <!-- 게시글 등록 -->
+    <insert id="insertPost" parameterType="com.freefit.freefitapp.vo.PostVO">
+        <selectKey keyProperty="postId" resultType="int" order="BEFORE">
+            SELECT POSTS_SEQ.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO POSTS (
+        POST_ID, USER_ID, CATEGORY, TITLE, CONTENT,
+        IS_PRIVATE, POST_PASSWORD, CREATED_AT
+        ) VALUES (
+        #{postId}, #{userId}, #{category}, #{title}, #{content},
+        #{isPrivate,jdbcType=CHAR}, #{postPassword,jdbcType=VARCHAR}, SYSDATE
+        )
+    </insert>
+
+    <!-- 게시글 이미지 -->
+    <insert id="insertPostImage" parameterType="com.freefit.freefitapp.vo.PostImageVO">
+        INSERT INTO POST_IMAGES (
+            POST_ID, IMAGE_URL, CREATED_AT
+        ) VALUES (
+                     #{postId}, #{imageUrl}, SYSDATE
+                 )
+    </insert>
+
+    <!-- 게시글 전체 조회 -->
+    <select id="getAllPosts" resultMap="postMap">
+        SELECT
+            A.POST_ID,
+            A.USER_ID,
+            A.CATEGORY,
+            A.TITLE,
+            A.CONTENT,
+            A.IS_PRIVATE,
+            A.POST_PASSWORD,
+            A.CREATED_AT,
+            A.UPDATED_AT,
+            B.NICKNAME,
+            NVL(C.LIKE_COUNT, 0) AS LIKE_COUNT,
+            NVL(D.COMMENT_COUNT, 0) AS COMMENT_COUNT
+        FROM POSTS A
+                 LEFT JOIN DOGINFO B ON A.USER_ID = B.USERID
+                 LEFT JOIN (
+            SELECT POST_ID, COUNT(*) AS LIKE_COUNT
+            FROM POST_LIKES
+            GROUP BY POST_ID
+        ) C ON A.POST_ID = C.POST_ID
+                 LEFT JOIN (
+            SELECT POST_ID, COUNT(*) AS COMMENT_COUNT
+            FROM POST_COMMENTS
+            GROUP BY POST_ID
+        ) D ON A.POST_ID = D.POST_ID
+        ORDER BY A.CREATED_AT DESC
+    </select>
+
+    <!-- 게시글 카테고리별 조회 -->
+    <select id="getPostCategory" parameterType="string" resultMap="postMap">
+        SELECT
+            A.POST_ID,
+            A.USER_ID,
+            A.CATEGORY,
+            A.TITLE,
+            A.CONTENT,
+            A.IS_PRIVATE,
+            A.POST_PASSWORD,
+            A.CREATED_AT,
+            A.UPDATED_AT,
+            B.NICKNAME,
+            NVL(C.LIKE_COUNT, 0) AS LIKE_COUNT,
+            NVL(D.COMMENT_COUNT, 0) AS COMMENT_COUNT
+        FROM POSTS A
+                 LEFT JOIN DOGINFO B ON A.USER_ID = B.USERID
+                 LEFT JOIN (
+            SELECT POST_ID, COUNT(*) AS LIKE_COUNT
+            FROM POST_LIKES
+            GROUP BY POST_ID
+        ) C ON A.POST_ID = C.POST_ID
+                 LEFT JOIN (
+            SELECT POST_ID, COUNT(*) AS COMMENT_COUNT
+            FROM POST_COMMENTS
+            GROUP BY POST_ID
+        ) D ON A.POST_ID = D.POST_ID
+        WHERE A.CATEGORY = #{category}
+        ORDER BY A.CREATED_AT DESC
+    </select>
+
+    <!-- 산책모임 등록 -->
+    <insert id="insertWalkGroup" parameterType="com.freefit.freefitapp.vo.WalkGroupVO">
+        INSERT INTO WALK_GROUPS (
+            TITLE, DESCRIPTION, LOCATION, IMAGE_URL, CREATOR_ID,
+            DETAIL_ADDRESS, MEETING_TIME, MEETING_DAYS, CREATED_AT
+        ) VALUES (
+                     #{title}, #{description}, #{location}, #{imageUrl},
+                     #{creatorId}, #{detailAddress}, #{meetingTime}, #{meetingDays}, SYSDATE
+                 )
+    </insert>
+
+    <!-- 마지막 그룹 ID -->
+    <select id="selectLastGroupId" resultType="long">
+        SELECT MAX(GROUP_ID) FROM WALK_GROUPS
+    </select>
+
+    <!-- 태그 등록 -->
+    <insert id="insertGroupTag" parameterType="com.freefit.freefitapp.vo.WalkGroupTagVO">
+        INSERT INTO WALK_GROUPTAGS (
+            GROUP_ID, TAG_NAME, ICON_NAME
+        ) VALUES (
+                     #{groupId}, #{tagName}, #{iconName}
+                 )
+    </insert>
+
+    <!-- 이미지 등록 -->
+    <insert id="insertGroupImage" parameterType="com.freefit.freefitapp.vo.WalkGroupImageVO">
+        INSERT INTO WALK_GROUPIMAGES (
+            GROUP_ID, IMAGE_URL, UPLOADED_AT
+        ) VALUES (
+                     #{groupId}, #{imageUrl}, SYSDATE
+                 )
+    </insert>
+
+    <!-- 멤버 등록 -->
+    <insert id="insertGroupMember" parameterType="com.freefit.freefitapp.vo.WalkGroupMemberVO">
+        INSERT INTO WALK_GROUPMEMBERS (
+            GROUP_ID, USERID, ROLE, JOINED_AT
+        ) VALUES (
+                     #{groupId}, #{userId}, #{role}, SYSDATE
+                 )
+    </insert>
+
+    <!-- 산책모임 리스트 -->
+    <select id="selectWalkGroups" resultMap="walkGroupMap">
+        SELECT
+            A.GROUP_ID,
+            A.TITLE,
+            A.DESCRIPTION,
+            A.LOCATION,
+            A.IMAGE_URL,
+            A.CREATOR_ID,
+            A.CREATED_AT,
+            A.DETAIL_ADDRESS,
+            A.MEETING_DAYS,
+            A.MEETING_TIME,
+            NVL(B.NICKNAME, '익명') AS NICKNAME,
+            (SELECT COUNT(*) FROM WALK_GROUPMEMBERS M WHERE M.GROUP_ID = A.GROUP_ID) AS MEMBER_COUNT
+        FROM WALK_GROUPS A
+                 LEFT JOIN DOGINFO B ON A.CREATOR_ID = B.USERID
+        ORDER BY A.CREATED_AT DESC
+    </select>
+
+    <!-- 산책모임 상세 -->
+    <select id="selectWalkGroupDetail" parameterType="long" resultMap="walkGroupDetailMap">
+        SELECT
+            A.GROUP_ID,
+            A.TITLE,
+            A.DESCRIPTION,
+            A.LOCATION,
+            A.DETAIL_ADDRESS,
+            A.IMAGE_URL,
+            A.MEETING_DAYS,
+            A.MEETING_TIME,
+            A.CREATED_AT,
+            B.NICKNAME,
+            (SELECT COUNT(*) FROM WALK_GROUPMEMBERS M WHERE M.GROUP_ID = A.GROUP_ID) AS MEMBER_COUNT,
+            T.TAG_ID,
+            T.TAG_NAME,
+            T.ICON_NAME,
+            I.IMAGE_ID,
+            I.IMAGE_URL AS IMAGE_URL_SUB,
+            I.UPLOADED_AT
+        FROM WALK_GROUPS A
+                 LEFT JOIN DOGINFO B ON A.CREATOR_ID = B.USERID
+                 LEFT JOIN WALK_GROUPTAGS T ON A.GROUP_ID = T.GROUP_ID
+                 LEFT JOIN WALK_GROUPIMAGES I ON A.GROUP_ID = I.GROUP_ID
+        WHERE A.GROUP_ID = #{groupId}
+    </select>
+
+    <select id="getUserRoleInGroup" resultType="string">
+        SELECT ROLE
+        FROM WALK_GROUPMEMBERS
+        WHERE GROUP_ID = #{groupId}
+        AND USERID = #{userId}
+    </select>
+
+    <insert id="insertNotice">
+        INSERT INTO WALK_GROUPNOTICES (GROUP_ID, CONTENT, CREATED_AT, CREATED_BY)
+        VALUES (#{groupId}, #{notice}, SYSDATE, #{createdBy})
+    </insert>
+
+    <insert id="insertGallery">
+        INSERT INTO WALK_GROUPGALLERY (GROUP_ID, IMAGE_URL, UPLOADED_AT, UPLOADED_BY)
+        VALUES (#{groupId}, #{imageUrl}, SYSDATE, #{uploadedBy})
+    </insert>
+
+    <select id="selectNotices" parameterType="long" resultType="com.freefit.freefitapp.vo.WalkGroupNoticeVO">
+        SELECT
+            NOTICE_ID      AS noticeId,
+            GROUP_ID       AS groupId,
+            CONTENT        AS content,
+            TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') AS createdAt,
+            CREATED_BY     AS createdBy
+        FROM WALK_GROUPNOTICES
+        WHERE GROUP_ID = #{groupId}
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <select id="selectGallery" parameterType="long" resultType="com.freefit.freefitapp.vo.WalkGroupGalleryVO">
+        SELECT
+            GALLERY_ID   AS galleryId,
+            GROUP_ID     AS groupId,
+            IMAGE_URL    AS imageUrl,
+            TO_CHAR(UPLOADED_AT, 'YYYY-MM-DD HH24:MI:SS') AS uploadedAt,
+            UPLOADED_BY  AS uploadedBy
+        FROM WALK_GROUPGALLERY
+        WHERE GROUP_ID = #{groupId}
+        ORDER BY UPLOADED_AT DESC
+    </select>
+
+    <select id="selectPostDetail" resultMap="postMap">
+        SELECT
+            A.POST_ID,
+            A.USER_ID,
+            A.CATEGORY,
+            A.TITLE,
+            A.CONTENT,
+            A.IS_PRIVATE,
+            A.POST_PASSWORD,
+            A.CREATED_AT,
+            A.UPDATED_AT,
+            NVL((SELECT COUNT(*) FROM POST_LIKES B WHERE B.POST_ID = A.POST_ID), 0) AS LIKE_COUNT,
+            NVL((SELECT COUNT(*) FROM POST_COMMENTS C WHERE C.POST_ID = A.POST_ID), 0) AS COMMENT_COUNT,
+            E.NICKNAME,
+            D.ROLE
+        FROM POSTS A
+                 JOIN USERINFO D ON A.USER_ID = D.USERID
+                 LEFT JOIN DOGINFO E ON D.USERID = E.USERID
+        WHERE A.POST_ID = #{postId}
+    </select>
+
+    <select id="selectComments" resultMap="commentMap">
+        SELECT
+            A.COMMENT_ID,
+            A.POST_ID,
+            A.USER_ID,
+            A.CONTENT,
+            A.CREATED_AT,
+            A.PARENT_ID,
+            B.NICKNAME
+        FROM POST_COMMENTS A
+        JOIN DOGINFO B ON A.USER_ID = B.USERID
+        WHERE A.POST_ID = #{postId}
+        ORDER BY A.CREATED_AT ASC
+    </select>
+
+    <insert id="insertComment">
+        INSERT INTO POST_COMMENTS(
+            POST_ID,
+            USER_ID,
+            CONTENT,
+            CREATED_AT,
+            PARENT_ID
+        ) VALUES (
+            #{postId},
+            #{userId},
+            #{content},
+            SYSDATE,
+            #{parentId, jdbcType=INTEGER}
+        )
+    </insert>
+
+    <insert id="insertReply">
+        INSERT INTO POST_COMMENTS (
+            POST_ID,
+            USER_ID,
+            CONTENT,
+            PARENT_ID,
+            CREATED_AT
+        ) VALUES (
+            #{postId},
+            #{userId},
+            #{content},
+            #{parentId, jdbcType=INTEGER},
+            SYSDATE
+        )
+    </insert>
+
+    <select id="getLikeCount" resultType="int">
+        SELECT COUNT(*)
+        FROM POST_LIKES
+        WHERE POST_ID = #{postId}
+    </select>
+
+    <select id="checkUserLiked" resultType="int">
+        SELECT NVL(COUNT(*), 0)
+        FROM POST_LIKES
+        WHERE POST_ID = #{postId}
+          AND USER_ID = #{userId}
+    </select>
+
+    <insert id="insertLike">
+        INSERT INTO POST_LIKES (POST_ID, USER_ID, CREATED_AT)
+        VALUES (#{postId}, #{userId}, SYSDATE)
+    </insert>
+
+    <delete id="deleteLike">
+        DELETE FROM POST_LIKES
+        WHERE POST_ID = #{postId}
+          AND USER_ID = #{userId}
+    </delete>
+
+</mapper>

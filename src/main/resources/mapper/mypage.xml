@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.mypage.dao.mypageDao">
+
+    <resultMap id="userMap" type="com.freefit.freefitapp.vo.userinfoVO">
+        <result column="USERID" property="userId"/>
+        <result column="PASSWORD" property="password"/>
+        <result column="EMAIL" property="email"/>
+        <result column="NAME" property="name"/>
+        <result column="BIRTH" property="birth"/>
+        <result column="CARRIER" property="carrier"/>
+        <result column="GENDER" property="gender"/>
+        <result column="NATIONALITY" property="nationality"/>
+        <result column="PHONE" property="phone"/>
+        <result column="NICKNAME" property="nickname"/>
+        <result column="CURRENTPASSWORD" property="currentPassword"/>
+        <result column="NEWPASSWORD" property="newPassword"/>
+    </resultMap>
+
+    <resultMap id="WalkLogMap" type="com.freefit.freefitapp.vo.WalkLogVO">
+        <id property="walkId" column="WALK_ID" />
+        <result property="userId" column="USERID" />
+        <result property="startTime" column="START_TIME" />
+        <result property="endTime" column="END_TIME" />
+        <result property="duration" column="DURATION" />
+        <result property="createdAt" column="CREATED_AT" />
+    </resultMap>
+
+    <resultMap id="EmergencyLogMap" type="com.freefit.freefitapp.vo.EmergencyLogVO">
+        <id property="logId" column="LOG_ID" />
+        <result property="walkId" column="WALK_ID" />
+        <result property="symptomName" column="SYMPTOM_NAME" />
+        <result property="severity" column="SEVERITY" />
+        <result property="description" column="DESCRIPTION" />
+        <result property="actionGuide" column="ACTION_GUIDE" />
+        <result property="recordedAt" column="RECORDED_AT" />
+    </resultMap>
+
+    <resultMap id="PostMap" type="com.freefit.freefitapp.vo.PostVO">
+        <id property="postId" column="POST_ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="category" column="CATEGORY"/>
+        <result property="title" column="TITLE"/>
+        <result property="content" column="CONTENT"/>
+        <result property="isPrivate" column="IS_PRIVATE"/>
+        <result property="postPassword" column="POST_PASSWORD"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+        <result property="likeCount" column="LIKE_COUNT"/>
+        <result property="commentCount" column="COMMENT_COUNT"/>
+        <result property="nickname" column="NICKNAME"/>
+        <result property="role" column="ROLE"/>
+    </resultMap>
+
+    <resultMap id="commentMap" type="com.freefit.freefitapp.vo.CommentVO">
+        <result property="commentId" column="COMMENT_ID" />
+        <result property="postId" column="POST_ID" />
+        <result property="userId" column="USER_ID" />
+        <result property="content" column="CONTENT" />
+        <result property="createdAt" column="CREATED_AT" />
+        <result property="nickname" column="NICKNAME"/>
+        <result property="parentId" column="PARENT_ID" />
+        <result property="postTitle" column="POST_TITLE" />
+    </resultMap>
+
+    <resultMap id="CouponMap" type="com.freefit.freefitapp.vo.CouponVO">
+        <result property="couponId" column="COUPON_ID"/>
+        <result property="title" column="TITLE"/>
+        <result property="tag" column="TAG"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="discountValue" column="DISCOUNT_VALUE"/>
+        <result property="validFrom" column="VALID_FROM"/>
+        <result property="validUntil" column="VALID_UNTIL"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="userCouponId" column="USER_COUPON_ID"/>
+        <result property="userId" column="USERID"/>
+        <result property="issuedAt" column="ISSUED_AT"/>
+        <result property="usedAt" column="USED_AT"/>
+        <result property="status" column="STATUS"/>
+    </resultMap>
+
+    <resultMap id="deliveryAddressMap" type="com.freefit.freefitapp.vo.DeliveryAddressVO">
+        <id property="addressId" column="ADDRESS_ID"/>
+        <result property="userId" column="USERID"/>
+        <result property="recipientName" column="RECIPIENT_NAME"/>
+        <result property="phone" column="PHONE"/>
+        <result property="address" column="ADDRESS"/>
+        <result property="addressDetail" column="ADDRESS_DETAIL"/>
+        <result property="isDefault" column="IS_DEFAULT"/>
+        <result property="createdAt" column="CREATED_AT"/>
+    </resultMap>
+
+    <select id="selectUser" resultMap="userMap">
+        SELECT
+            A.USERID,
+            B.NICKNAME,
+            A.EMAIL,
+            A.NAME
+        FROM USERINFO A
+        JOIN DOGINFO B ON A.USERID = B.USERID
+        WHERE A.USERID = #{userId}
+    </select>
+
+    <select id="selectWalkLog" resultMap="WalkLogMap">
+        SELECT
+            WALK_ID,
+            CREATED_AT,
+            DURATION
+        FROM WALK_LOG
+        WHERE USERID = #{userId}
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <select id="selectWalkLogDetail" resultMap="WalkLogMap">
+        SELECT
+            WALK_ID,
+            USERID,
+            TO_CHAR(START_TIME, 'YYYY-MM-DD HH24:MI:SS') AS START_TIME,
+            TO_CHAR(END_TIME, 'YYYY-MM-DD HH24:MI:SS') AS END_TIME,
+            DURATION,
+            TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') AS CREATED_AT
+        FROM WALK_LOG
+        WHERE WALK_ID = #{walkId}
+    </select>
+
+    <select id="selectEmergencyLog" resultMap="EmergencyLogMap">
+        SELECT
+            LOG_ID,
+            WALK_ID,
+            SYMPTOM_NAME,
+            SEVERITY,
+            DESCRIPTION,
+            ACTION_GUIDE,
+            TO_CHAR(RECORDED_AT, 'YYYY-MM-DD HH24:MI:SS') AS RECORDED_AT
+        FROM EMERGENCY_LOG
+        WHERE WALK_ID = #{walkId}
+        ORDER BY RECORDED_AT ASC
+    </select>
+
+    <select id="selectPost" resultMap="PostMap">
+        SELECT
+            p.POST_ID,
+            p.USER_ID,
+            p.CATEGORY,
+            p.TITLE,
+            p.CONTENT,
+            p.IS_PRIVATE,
+            p.POST_PASSWORD,
+            TO_CHAR(p.CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') CREATED_AT,
+            TO_CHAR(p.UPDATED_AT, 'YYYY-MM-DD HH24:MI:SS') UPDATED_AT,
+            NVL(l.like_count, 0) LIKE_COUNT,
+            NVL(c.comment_count, 0) COMMENT_COUNT,
+            d.NICKNAME
+        FROM POSTS p
+                 JOIN USERINFO u ON p.USER_ID = u.USERID
+                 JOIN DOGINFO d ON p.USER_ID = d.USERID
+                 LEFT JOIN (
+            SELECT POST_ID, COUNT(*) like_count
+            FROM POST_LIKES
+            GROUP BY POST_ID
+        ) l ON p.POST_ID = l.POST_ID
+                 LEFT JOIN (
+            SELECT POST_ID, COUNT(*) comment_count
+            FROM POST_COMMENTS
+            GROUP BY POST_ID
+        ) c ON p.POST_ID = c.POST_ID
+        WHERE p.USER_ID = #{userId}
+        ORDER BY p.CREATED_AT DESC
+    </select>
+
+    <select id="selectComment" resultMap="commentMap">
+        SELECT
+            c.comment_id,
+            c.post_id,
+            c.user_id,
+            c.content,
+            TO_CHAR(c.created_at, 'YYYY-MM-DD HH24:MI:SS') created_at,
+            p.title AS post_title
+        FROM post_comments c
+                 JOIN posts p ON c.post_id = p.post_id
+        WHERE c.user_id = #{userId}
+        ORDER BY c.created_at DESC
+    </select>
+
+    <select id="selectUserCoupon" resultMap="CouponMap">
+        SELECT
+            A.USER_COUPON_ID,
+            A.USERID,
+            A.COUPON_ID,
+            TO_CHAR(A.ISSUED_AT, 'YYYY-MM-DD HH24:MI:SS') ISSUED_AT,
+            TO_CHAR(A.USED_AT, 'YYYY-MM-DD HH24:MI:SS')   USED_AT,
+            A.STATUS,
+            B.TITLE,
+            B.TAG,
+            B.DESCRIPTION,
+            B.DISCOUNT_VALUE,
+            TO_CHAR(B.VALID_FROM, 'YYYY-MM-DD')  VALID_FROM,
+            TO_CHAR(B.VALID_UNTIL, 'YYYY-MM-DD') VALID_UNTIL
+        FROM USER_COUPONS A
+                 JOIN COUPONS B ON A.COUPON_ID = B.COUPON_ID
+        WHERE A.USERID = #{userId}
+        ORDER BY A.ISSUED_AT DESC
+    </select>
+
+    <select id="selectUserInfo" resultMap="userMap">
+        SELECT
+            A.USERID,
+            A.NAME,
+            B.NICKNAME,
+            A.EMAIL,
+            TO_CHAR(A.BIRTH, 'YYYY-MM-DD') AS BIRTH,
+            A.GENDER,
+            A.PHONE,
+            A.ADDRESS,
+            A.ADDRESS_DETAIL,
+            A.ROLE
+        FROM USERINFO A
+                 LEFT JOIN DOGINFO B
+                           ON A.USERID = B.USERID
+        WHERE A.USERID = #{userId}
+    </select>
+
+    <select id="getPassword" parameterType="string" resultType="string">
+        SELECT
+            PASSWORD
+        FROM USERINFO
+        WHERE USERID = #{userId}
+    </select>
+
+    <update id="updatePassword">
+        UPDATE USERINFO
+        SET PASSWORD = #{newPassword}
+        WHERE USERID = #{userId}
+    </update>
+
+    <update id="updateUserBirth">
+        UPDATE USERINFO
+        SET BIRTH = #{birth}
+        WHERE USERID = #{userId}
+    </update>
+
+    <update id="updateDogNickname">
+        UPDATE DOGINFO
+        SET NICKNAME = #{nickname}
+        WHERE USERID = #{userId}
+    </update>
+
+    <update id="updateContact">
+        UPDATE USERINFO
+        SET EMAIL = #{email},
+            PHONE = #{phone}
+        WHERE USERID = #{userId}
+    </update>
+
+    <select id="selectUserAddress" resultMap="userMap">
+        SELECT
+            ADDRESS
+        FROM USERINFO
+        WHERE USERID = #{userId}
+    </select>
+
+    <select id="selectDeliveryAddress" resultMap="deliveryAddressMap">
+        SELECT
+            ADDRESS_ID,
+            USERID,
+            RECIPIENT_NAME,
+            PHONE,
+            ADDRESS,
+            ADDRESS_DETAIL,
+            CREATED_AT
+        FROM DELIVERY_ADDRESS
+        WHERE USERID = #{userId}
+    </select>
+
+    <update id="updateUserAddress">
+        UPDATE USERINFO
+        SET ADDRESS = #{address},
+            ADDRESS_DETAIL = #{addressDetail}
+        WHERE USERID = #{userId}
+    </update>
+
+    <update id="updateDeliveryAddress">
+        UPDATE DELIVERY_ADDRESS
+        SET RECIPIENT_NAME = #{recipientName},
+            PHONE = #{phone},
+            ADDRESS = #{address},
+            ADDRESS_DETAIL = #{addressDetail}
+        WHERE ADDRESS_ID = #{addressId}
+    </update>
+
+    <delete id="deleteDeliveryAddress">
+        DELETE FROM DELIVERY_ADDRESS
+        WHERE ADDRESS_ID = #{addressId}
+    </delete>
+
+    <insert id="insertDeliveryAddress">
+        INSERT INTO DELIVERY_ADDRESS (
+            USERID, RECIPIENT_NAME, PHONE, ADDRESS, ADDRESS_DETAIL, IS_DEFAULT
+        ) VALUES (
+                    #{userId}, #{recipientName}, #{phone}, #{address}, #{addressDetail},
+                    CASE WHEN (SELECT COUNT(*) FROM DELIVERY_ADDRESS WHERE USERID = #{userId}) = 0 THEN 'Y' ELSE 'N' END
+                )
+    </insert>
+</mapper>

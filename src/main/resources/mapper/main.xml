@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.main.dao.mainDao">
+
+    <resultMap id="signupMap" type="com.freefit.freefitapp.vo.userinfoVO">
+        <result column="USERID" property="userId"/>
+        <result column="PASSWORD" property="password"/>
+        <result column="EMAIL" property="email"/>
+        <result column="NAME" property="name"/>
+        <result column="BIRTH" property="birth"/>
+        <result column="CARRIER" property="carrier"/>
+        <result column="GENDER" property="gender"/>
+        <result column="NATIONALITY" property="nationality"/>
+        <result column="PHONE" property="phone"/>
+    </resultMap>
+
+    <resultMap id="doginfoMap" type="com.freefit.freefitapp.vo.DogInfoVO">
+        <result column="DOG_ID" property="dogId"/>
+        <result column="USERID" property="userId"/>
+        <result column="NICKNAME" property="nickName"/>
+        <result column="DOG_NAME" property="dogName"/>
+        <result column="BREED_ID" property="breedId"/>
+        <result column="DOG_AGE" property="dogAge"/>
+        <result column="DOG_WEIGHT" property="dogWeight"/>
+        <result column="DOG_GENDER" property="dogGender"/>
+        <result column="DOG_NOTE" property="dogNote"/>
+        <result column="DOG_PERSONALITY" property="dogPersonality"/>
+        <result column="BREED_NAME" property="breedName"/>
+    </resultMap>
+
+    <resultMap id="promotionMap" type="com.freefit.freefitapp.vo.PromotionVO">
+        <result column="PROMO_ID" property="promoId"/>
+        <result column="TITLE"       property="title"/>
+        <result column="SUBTITLE"    property="subtitle"/>
+        <result column="TAG"         property="tag"/>
+        <result column="VALID_UNTIL" property="validUntil"/>
+        <result column="CREATED_AT"  property="createdAt"/>
+    </resultMap>
+
+    <resultMap id="walksMap" type="com.freefit.freefitapp.vo.walksVO">
+        <result column="ID" property="id"/>
+        <result column="TITLE" property="title"/>
+        <result column="TAG" property="tag"/>
+        <result column="RATING" property="rating"/>
+        <result column="DISTANCE_KM" property="distanceKm"/>
+        <result column="LAT" property="lat"/>
+        <result column="LON" property="lon"/>
+        <result column="CREATED_AT" property="createdAt"/>
+        <result column="DISTANCECALC" property="distanceCalc"/>
+        <result column="IMAGE_URL" property="imageUrl"/>
+    </resultMap>
+
+    <select id="selectNickname" parameterType="string" resultType="string">
+        SELECT NICKNAME
+        FROM doginfo
+        WHERE USERID = #{userId}
+            FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <select id="selectDoginfo" resultMap="doginfoMap">
+        SELECT
+            DOG_ID,
+            USERID,
+            NICKNAME,
+            DOG_NAME,
+            BREED_ID,
+            DOG_AGE,
+            DOG_WEIGHT,
+            DOG_GENDER,
+            DOG_NOTE,
+            DOG_PERSONALITY,
+            BREED_NAME
+        FROM DOGINFO
+        WHERE USERID = #{userId}
+    </select>
+
+    <select id="selectPromotion" resultMap="promotionMap">
+        SELECT
+            PROMO_ID,
+            TITLE,
+            SUBTITLE,
+            TAG,
+            VALID_UNTIL
+        FROM PROMOTIONS
+        WHERE 1 = 1
+    </select>
+
+    <select id="selectWalks" resultMap="walksMap">
+            <![CDATA[
+        SELECT id, title, tag, rating, distance_km, lat, lon, IMAGE_URL,
+               (6371 * ACOS(
+                       COS(lat * (3.141592653589793/180)) *
+                       COS(#{lat} * (3.141592653589793/180)) *
+                       COS((#{lon} * (3.141592653589793/180)) - (lon * (3.141592653589793/180))) +
+                       SIN(lat * (3.141592653589793/180)) *
+                       SIN(#{lat} * (3.141592653589793/180))
+                       )) AS DISTANCECALC
+        FROM walks
+        WHERE (6371 * ACOS(
+                COS(lat * (3.141592653589793/180)) *
+                COS(#{lat} * (3.141592653589793/180)) *
+                COS((#{lon} * (3.141592653589793/180)) - (lon * (3.141592653589793/180))) +
+                SIN(lat * (3.141592653589793/180)) *
+                SIN(#{lat} * (3.141592653589793/180))
+                      )) <= 5
+        ORDER BY DISTANCECALC ASC
+        ]]>
+    </select>
+
+</mapper>

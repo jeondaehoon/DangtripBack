@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.doginfo.dao.doginfoDao">
+
+    <resultMap id="doginfoMap" type="com.freefit.freefitapp.vo.DogInfoVO">
+        <result column="DOG_ID" property="dogId"/>
+        <result column="USERID" property="userId"/>
+        <result column="NICKNAME" property="nickName"/>
+        <result column="DOG_NAME" property="dogName"/>
+        <result column="BREED_ID" property="breedId"/>
+        <result column="DOG_AGE" property="dogAge"/>
+        <result column="DOG_WEIGHT" property="dogWeight"/>
+        <result column="DOG_GENDER" property="dogGender"/>
+        <result column="DOG_NOTE" property="dogNote"/>
+        <result column="DOG_PERSONALITY" property="dogPersonality"/>
+        <result column="BREED_NAME" property="breedName"/>
+        <result column="HAS_DOG" property="hasDog"/>
+    </resultMap>
+
+    <resultMap id="categoryMap" type="com.freefit.freefitapp.vo.CategoryVO">
+        <id column="CATEGORY_ID" property="categoryId"/>
+        <result column="PARENT_ID" property="parentId"/>
+        <result column="NAME" property="name"/>
+        <result column="LEVEL_NO" property="levelNo"/>
+    </resultMap>
+
+
+    <select id="selectDogBreed" resultMap="doginfoMap">
+        SELECT
+            BREED_ID,
+            BREED_NAME
+        FROM DOG_BREEDS
+        WHERE 1 = 1
+    </select>
+
+    <select id="checknickName" resultType="int">
+        SELECT COUNT(*)
+        FROM DOGINFO
+        WHERE NICKNAME = #{nickName}
+    </select>
+
+    <insert id="saveDogInfo" parameterType="com.freefit.freefitapp.vo.DogInfoVO">
+        INSERT INTO DOGINFO (
+            DOG_ID, USERID, NICKNAME, DOG_NAME, BREED_ID, DOG_AGE, DOG_WEIGHT, DOG_GENDER,
+            DOG_NOTE, DOG_PERSONALITY, BREED_NAME, HAS_DOG
+        )
+        VALUES (
+                   #{dogId},
+                   #{userId},
+                   #{nickName},
+                   #{dogName},
+                   #{breedId},
+                   #{dogAge},
+                   #{dogWeight},
+                   #{dogGender},
+                   COALESCE(#{dogNote}, '건강합니다.'),
+                   #{dogPersonality},
+                   #{breedName},
+                   #{hasDog}
+               )
+    </insert>
+
+
+    <select id="selectCatList" resultMap="categoryMap">
+        SELECT
+            CATEGORY_ID,
+            PARENT_ID,
+            NAME,
+            LEVEL_NO
+        FROM DOGSTATUS_CATEGORY
+    </select>
+</mapper>

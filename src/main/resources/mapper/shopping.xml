@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.shopping.dao.shoppingDao">
+
+    <resultMap id="shoppingMap" type="com.freefit.freefitapp.vo.ShoppingVO">
+        <result column="CATEGORY_ID" property="categoryId" />
+        <result column="CATEGORY_NAME" property="categoryName" />
+        <result column="ICON_URL" property="iconUrl" />
+        <result column="PRODUCT_ID" property="productId" />
+        <result column="NAME" property="name" />
+        <result column="DESCRIPTION" property="description" />
+        <result column="PRICE" property="price" />
+        <result column="IMAGE_URL" property="imageUrl" />
+        <result column="RATING" property="rating" />
+        <result column="REVIEWS_COUNT" property="reviewsCount" />
+        <result column="SALES_COUNT" property="salesCount" />
+        <result column="CREATED_AT" property="createdAt" />
+    </resultMap>
+
+    <resultMap id="cartMap" type="com.freefit.freefitapp.vo.CartVO">
+        <result column="CART_ID" property="cartId" />
+        <result column="USERID" property="userId" />
+        <result column="PRODUCT_ID" property="productId" />
+        <result column="QUANTITY" property="quantity" />
+        <result column="CREATED_AT" property="createdAt" />
+        <result column="UPDATE_AT" property="updateAt" />
+    </resultMap>
+    
+    <select id="selectCategory" resultMap="shoppingMap">
+        SELECT
+            CATEGORY_ID,
+            CATEGORY_NAME,
+            ICON_URL
+        FROM SHOPPINGCATEGORY
+        ORDER BY CATEGORY_ID
+    </select>
+
+    <select id="selectProduct" resultMap="shoppingMap">
+        SELECT
+        PRODUCT_ID,
+        CATEGORY_ID,
+        NAME,
+        DESCRIPTION,
+        PRICE,
+        IMAGE_URL,
+        RATING,
+        REVIEWS_COUNT,
+        SALES_COUNT
+        FROM SHOPPINGPRODUCT
+        <where>
+            <if test="categoryId != null">
+                CATEGORY_ID = #{categoryId}
+            </if>
+        </where>
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <select id="selectRankings" resultMap="shoppingMap">
+        SELECT *
+        FROM (
+                 SELECT PRODUCT_ID,
+                        NAME,
+                        SALES_COUNT,
+                        RATING,
+                        REVIEWS_COUNT,
+                        IMAGE_URL,
+                        ROW_NUMBER() OVER (ORDER BY SALES_COUNT DESC) AS RN
+                 FROM SHOPPINGPRODUCT
+             )
+        WHERE RN &lt;= 10
+    </select>
+
+    <insert id="addCart">
+        MERGE INTO CART c
+            USING (SELECT #{userId} AS USER_ID, #{productId} AS PRODUCT_ID FROM dual) d
+            ON (c.USERID = d.USER_ID AND c.PRODUCT_ID = d.PRODUCT_ID)
+            WHEN MATCHED THEN
+                UPDATE SET c.QUANTITY = c.QUANTITY + 1,
+                    c.UPDATED_AT = SYSDATE
+            WHEN NOT MATCHED THEN
+                INSERT (USERID, PRODUCT_ID, QUANTITY, CREATED_AT)
+                    VALUES (#{userId}, #{productId}, #{quantity}, SYSDATE)
+    </insert>
+</mapper>

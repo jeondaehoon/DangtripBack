@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.order.dao.orderDao">
+
+    <resultMap id="userMap" type="com.freefit.freefitapp.vo.userinfoVO">
+        <result column="USERID" property="userId"/>
+        <result column="PASSWORD" property="password"/>
+        <result column="EMAIL" property="email"/>
+        <result column="NAME" property="name"/>
+        <result column="BIRTH" property="birth"/>
+        <result column="CARRIER" property="carrier"/>
+        <result column="GENDER" property="gender"/>
+        <result column="NATIONALITY" property="nationality"/>
+        <result column="PHONE" property="phone"/>
+        <result column="ADDRESS" property="address" />
+        <result column="ADDRESS_DETAIL" property="addressDetail" />
+    </resultMap>
+
+    <resultMap id="deliveryAddressMap" type="com.freefit.freefitapp.vo.DeliveryAddressVO">
+        <id property="addressId" column="ADDRESS_ID"/>
+        <result property="userId" column="USERID"/>
+        <result property="recipientName" column="RECIPIENT_NAME"/>
+        <result property="phone" column="PHONE"/>
+        <result property="address" column="ADDRESS"/>
+        <result property="addressDetail" column="ADDRESS_DETAIL"/>
+        <result property="isDefault" column="IS_DEFAULT"/>
+        <result property="createdAt" column="CREATED_AT"/>
+    </resultMap>
+
+    <select id="selectUserInfo" resultMap="userMap">
+        SELECT
+            USERID,
+            EMAIL,
+            NAME,
+            BIRTH,
+            CARRIER,
+            GENDER,
+            NATIONALITY,
+            PHONE,
+            ADDRESS,
+            ADDRESS_DETAIL
+        FROM USERINFO
+        WHERE USERID = #{userId}
+    </select>
+
+    <insert id="insertAddress" >
+        INSERT INTO DELIVERY_ADDRESS (
+            USERID, RECIPIENT_NAME, PHONE, ADDRESS, ADDRESS_DETAIL, IS_DEFAULT
+        ) VALUES (
+            #{userId}, #{recipientName}, #{phone}, #{address}, #{addressDetail},
+            CASE WHEN (SELECT COUNT(*) FROM DELIVERY_ADDRESS WHERE USERID = #{userId}) = 0 THEN 'Y' ELSE 'N' END
+        )
+    </insert>
+
+    <select id="selectDeliveryInfo" resultMap="deliveryAddressMap">
+        SELECT
+            ADDRESS_ID,
+            USERID,
+            RECIPIENT_NAME,
+            PHONE,
+            ADDRESS,
+            ADDRESS_DETAIL,
+            IS_DEFAULT,
+            CREATED_AT
+        FROM DELIVERY_ADDRESS
+        WHERE USERID = #{userId}
+    </select>
+
+    <insert id="insertOrder" parameterType="com.freefit.freefitapp.vo.OrdersVO">
+        <selectKey keyProperty="orderId" resultType="int" order="BEFORE">
+            SELECT ORDERS_SEQ.NEXTVAL FROM dual
+        </selectKey>
+
+        INSERT INTO ORDERS (
+        ORDER_ID,
+        USERID,
+        NAME,
+        PHONE,
+        ADDRESS,
+        ADDRESS_DETAIL,
+        PAYMENT,
+        TOTAL_PRICE,
+        ORDER_STATUS,
+        CREATED_AT
+        ) VALUES (
+        #{orderId},
+        #{userId},
+        #{name},
+        #{phone},
+        #{address},
+        #{addressDetail},
+        #{payment},
+        #{totalPrice},
+        'READY',
+        SYSDATE
+        )
+    </insert>
+
+    <insert id="insertOrderItem" parameterType="com.freefit.freefitapp.vo.OrderItemsVO">
+        INSERT INTO ORDER_ITEMS (
+            ORDER_ID,
+            PRODUCT_ID,
+            PRODUCT_NAME,
+            QUANTITY,
+            PRICE,
+            CREATED_AT
+        ) VALUES (
+            #{orderId},
+            #{productId},
+            #{productName},
+            #{quantity},
+            #{price},
+            SYSDATE
+        )
+    </insert>
+
+    <delete id="deleteCartUserId">
+        DELETE FROM CART
+        WHERE USERID = #{userId}
+    </delete>
+</mapper>

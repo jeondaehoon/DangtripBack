@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.walks.dao.walksDao">
+
+    <resultMap id="walksMap" type="com.freefit.freefitapp.vo.walksVO">
+        <result column="ID" property="id"/>
+        <result column="TITLE" property="title"/>
+        <result column="TAG" property="tag"/>
+        <result column="RATING" property="rating"/>
+        <result column="DISTANCE_KM" property="distanceKm"/>
+        <result column="LAT" property="lat"/>
+        <result column="LON" property="lon"/>
+        <result column="CREATED_AT" property="createdAt"/>
+        <result column="DISTANCECALC" property="distanceCalc"/>
+        <result column="IMAGE_URL" property="imageUrl"/>
+        <result column="DESCRIPTION" property="description"/>
+    </resultMap>
+
+    <select id="selectNearWalks" resultMap="walksMap">
+        <![CDATA[
+        SELECT id, title, tag, rating, distance_km, lat, lon, IMAGE_URL,
+               (6371 * ACOS(
+                       COS(lat * (3.141592653589793/180)) *
+                       COS(#{lat} * (3.141592653589793/180)) *
+                       COS((#{lon} * (3.141592653589793/180)) - (lon * (3.141592653589793/180))) +
+                       SIN(lat * (3.141592653589793/180)) *
+                       SIN(#{lat} * (3.141592653589793/180))
+                       )) AS DISTANCECALC
+        FROM walks
+        WHERE (6371 * ACOS(
+                COS(lat * (3.141592653589793/180)) *
+                COS(#{lat} * (3.141592653589793/180)) *
+                COS((#{lon} * (3.141592653589793/180)) - (lon * (3.141592653589793/180))) +
+                SIN(lat * (3.141592653589793/180)) *
+                SIN(#{lat} * (3.141592653589793/180))
+                      )) <= 5
+        ORDER BY DISTANCECALC ASC
+        ]]>
+    </select>
+
+    <select id="selectPopularWalks" resultMap="walksMap">
+        SELECT
+            ID,
+            TITLE,
+            TAG,
+            RATING,
+            DISTANCE_KM,
+            LAT,
+            LON,
+            CREATED_AT,
+            IMAGE_URL
+        FROM WALKS
+        WHERE TAG = '인기'
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <select id="selectRecommendWalks" resultMap="walksMap">
+        SELECT
+            ID,
+            TITLE,
+            TAG,
+            RATING,
+            DISTANCE_KM,
+            LAT,
+            LON,
+            CREATED_AT,
+            IMAGE_URL
+        FROM WALKS
+        WHERE TAG = '추천'
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <select id="selectNightWalks" resultMap="walksMap">
+        SELECT
+            ID,
+            TITLE,
+            TAG,
+            RATING,
+            DISTANCE_KM,
+            LAT,
+            LON,
+            CREATED_AT,
+            IMAGE_URL
+        FROM WALKS
+        WHERE TAG = '야간'
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <select id="selectWalkDetail" parameterType="map" resultMap="walksMap">
+        SELECT
+            ID,
+            TITLE,
+            TAG,
+            RATING,
+            DISTANCE_KM,
+            LAT,
+            LON,
+            IMAGE_URL,
+            DESCRIPTION,
+            (6371 * acos(
+                    cos((#{lat} * 3.141592653589793) / 180)
+                        * cos((LAT * 3.141592653589793) / 180)
+                        * cos(((LON - #{lon}) * 3.141592653589793) / 180)
+                        + sin((#{lat} * 3.141592653589793) / 180)
+                        * sin((LAT * 3.141592653589793) / 180)
+                    )) AS distanceCalc
+        FROM WALKS
+        WHERE ID = #{id}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.coupon.dao.couponDao">
+
+    <resultMap id="couponMap" type="com.freefit.freefitapp.vo.CouponVO">
+        <result property="couponId" column="COUPON_ID" />
+        <result property="title" column="TITLE" />
+        <result property="tag" column="TAG" />
+        <result property="description" column="DESCRIPTION" />
+        <result property="discountValue" column="DISCOUNT_VALUE" />
+        <result property="validFrom" column="VALID_FROM" />
+        <result property="validUntil" column="VALID_UNTIL" />
+        <result property="createdAt" column="CREATED_AT" />
+    </resultMap>
+
+    <resultMap id="userCouponMap" type="com.freefit.freefitapp.vo.UserCouponVO">
+        <result property="userCouponId" column="USER_COUPON_ID" />
+        <result property="userId" column="USERID" />
+        <result property="couponId" column="COUPON_ID" />
+        <result property="issuedAt" column="ISSUED_AT" />
+        <result property="usedAt" column="USED_AT" />
+        <result property="status" column="STATUS" />
+    </resultMap>
+
+    <select id="selectCoupons" resultMap="couponMap">
+        SELECT
+            COUPON_ID,
+            TITLE,
+            TAG,
+            DESCRIPTION,
+            DISCOUNT_VALUE,
+            VALID_FROM,
+            VALID_UNTIL,
+            CREATED_AT
+        FROM COUPONS
+        WHERE COUPON_ID NOT IN (
+            SELECT COUPON_ID
+            FROM USER_COUPONS
+            WHERE USERID = #{userId}
+        )
+    </select>
+
+    <insert id="issueCoupon">
+        INSERT INTO USER_COUPONS(USERID, COUPON_ID, ISSUED_AT, STATUS)
+        VALUES (#{userId}, #{couponId}, SYSDATE, '발급')
+    </insert>
+
+</mapper>

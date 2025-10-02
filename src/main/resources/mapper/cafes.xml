@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.cafes.dao.cafesDao">
+
+    <resultMap id="cafesMap" type="com.freefit.freefitapp.vo.CafesVO">
+        <result column="ID" property="id" />
+        <result column="TITLE" property="title" />
+        <result column="TAG" property="tag" />
+        <result column="RATING" property="rating" />
+        <result column="ADDRESS" property="address" />
+        <result column="OPENING_HOURS" property="openingHours" />
+        <result column="LAT" property="lat" />
+        <result column="LON" property="lon" />
+        <result column="CREATED_AT" property="createdAt" />
+        <result column="IMAGE_URL" property="imageUrl" />
+        <result column="DISTANCE_CALC" property="distanceCalc" />
+        <result column="DESCRIPTION" property="description"/>
+    </resultMap>
+
+    <select id="selectNearCafe" resultMap="cafesMap">
+        <![CDATA[
+        SELECT ID, TITLE, TAG, RATING, ADDRESS, OPENING_HOURS, LAT, LON, CREATED_AT, IMAGE_URL,
+               6371 * ACOS(
+                       COS(LAT * (3.141592653589793/180)) *
+                       COS(#{lat} * (3.141592653589793/180)) *
+                       COS((#{lon} * (3.141592653589793/180)) - (LON * (3.141592653589793/180))) +
+                       SIN(LAT * (3.141592653589793/180)) *
+                       SIN(#{lat} * (3.141592653589793/180))
+                      ) AS DISTANCE_CALC
+        FROM cafes
+        WHERE 6371 * ACOS(
+                COS(LAT * (3.141592653589793/180)) *
+                COS(#{lat} * (3.141592653589793/180)) *
+                COS((#{lon} * (3.141592653589793/180)) - (LON * (3.141592653589793/180))) +
+                SIN(LAT * (3.141592653589793/180)) *
+                SIN(#{lat} * (3.141592653589793/180))
+                     ) <= 5
+        ORDER BY DISTANCE_CALC ASC
+        ]]>
+    </select>
+
+    <select id="selectPopularCafe" resultMap="cafesMap">
+        SELECT
+            ID,
+            TITLE,
+            TAG,
+            RATING,
+            ADDRESS,
+            OPENING_HOURS,
+            LAT,
+            LON,
+            CREATED_AT,
+            IMAGE_URL
+            FROM CAFES
+            WHERE TAG = '인기'
+            ORDER BY CREATED_AT DESC
+    </select>
+
+    <select id="selectRecommendCafe" resultMap="cafesMap">
+        SELECT
+            ID,
+            TITLE,
+            TAG,
+            RATING,
+            ADDRESS,
+            OPENING_HOURS,
+            LAT,
+            LON,
+            CREATED_AT,
+            IMAGE_URL
+        FROM CAFES
+        WHERE TAG = '추천'
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <select id="select24hoursCafe" resultMap="cafesMap">
+        SELECT
+            ID,
+            TITLE,
+            TAG,
+            RATING,
+            ADDRESS,
+            OPENING_HOURS,
+            LAT,
+            LON,
+            CREATED_AT,
+            IMAGE_URL
+        FROM CAFES
+        WHERE TAG = '24시간'
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <select id="selectCafeDetail" resultMap="cafesMap">
+        SELECT
+            ID,
+            TITLE,
+            TAG,
+            RATING,
+            ADDRESS,
+            OPENING_HOURS,
+            LAT,
+            LON,
+            CREATED_AT,
+            IMAGE_URL
+        FROM CAFES
+        WHERE ID = #{id}
+    </select>
+
+
+</mapper>

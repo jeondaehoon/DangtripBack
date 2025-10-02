@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.freefit.freefitapp.chat.dao.chatDao">
+
+    <resultMap id="roomMap" type="com.freefit.freefitapp.vo.ChatRoomVO">
+        <result property="roomId" column="ROOM_ID" />
+        <result property="title" column="TITLE" />
+        <result property="groupId" column="GROUP_ID" />
+        <result property="createdAt" column="CREATED_AT" />
+    </resultMap>
+
+    <resultMap id="messageMap" type="com.freefit.freefitapp.vo.ChatMessageVO">
+        <result property="messageId" column="MESSAGE_ID" />
+        <result property="roomId" column="ROOM_ID" />
+        <result property="userId" column="USER_ID" />
+        <result property="content" column="CONTENT" />
+        <result property="createdAt" column="CREATED_AT" />
+    </resultMap>
+
+    <resultMap id="memberMap" type="com.freefit.freefitapp.vo.ChatMemberVO">
+        <result property="memberId" column="MEMBER_ID" />
+        <result property="roomId" column="ROOM_ID" />
+        <result property="userId" column="USER_ID" />
+        <result property="joinedAt" column="JOINED_AT" />
+    </resultMap>
+
+    <select id="findRoomIdByGroupId" resultMap="roomMap">
+        SELECT ROOM_ID,
+               GROUP_ID,
+               TITLE,
+               TO_CHAR(CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') AS CREATED_AT
+        FROM CHAT_ROOMS
+        WHERE GROUP_ID = #{groupId}
+    </select>
+
+    <insert id="insertChatRoom">
+        INSERT INTO CHAT_ROOMS (GROUP_ID, TITLE, CREATED_AT)
+        VALUES (#{groupId}, 'Group Chat', SYSDATE)
+    </insert>
+
+    <select id="checkMemberExists" resultType="int">
+        SELECT COUNT(*)
+        FROM CHAT_MEMBERS
+        WHERE ROOM_ID = #{roomId}
+          AND USER_ID = #{userId}
+    </select>
+
+    <insert id="insertChatMember">
+        MERGE INTO CHAT_MEMBERS c
+            USING (SELECT #{roomId} AS ROOM_ID, #{userId} AS USER_ID FROM dual) src
+            ON (c.ROOM_ID = src.ROOM_ID AND c.USER_ID = src.USER_ID)
+            WHEN NOT MATCHED THEN
+                INSERT (ROOM_ID, USER_ID, JOINED_AT)
+                    VALUES (src.ROOM_ID, src.USER_ID, SYSDATE)
+    </insert>
+
+    <insert id="insertMessage" parameterType="com.freefit.freefitapp.vo.ChatMessageVO" useGeneratedKeys="true" keyProperty="messageId">
+        INSERT INTO chat_messages (room_id, user_id, content, created_at)
+        VALUES (#{roomId}, #{userId}, #{content}, NOW())
+    </insert>
+
+    <!-- 메시지 조회 -->
+    <select id="getMessagesRoom" parameterType="long" resultType="com.freefit.freefitapp.vo.ChatMessageVO">
+        SELECT
+            message_id AS messageId,
+            room_id AS roomId,
+            user_id AS userId,
+            content,
+            created_at AS createdAt
+        FROM chat_messages
+        WHERE room_id = #{roomId}
+        ORDER BY created_at ASC
+    </select>
+</mapper>
