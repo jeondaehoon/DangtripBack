@@ -263,10 +263,3 @@ http://localhost:8080
 ## 라이선스
 
 이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 `LICENSE` 파일을 참조하세요.
-
-
-프로젝트 링크: [https://github.com/your-username/dangtrip](https://github.com/your-username/dangtrip)
-
----
-
-**dangtrip과 함께 우리 강아지의 건강한 일상을 만들어가세요! **
